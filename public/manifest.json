@@ -1,0 +1,21 @@
+{
+  "name": "Sajilo Calendar",
+  "short_name": "Sajilo",
+  "description": "Your Ad-Free Nepali Calendar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EFF6FF",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/192.jpeg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/512.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+} 

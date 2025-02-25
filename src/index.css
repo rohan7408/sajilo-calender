@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+/* Custom calendar styles */
+.calendar-container {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.calendar-day:hover {
+  border-color: #93c5fd; /* blue-300 */
+}
+
+/* Ensure selected state is contained within the cell */
+.calendar-day.selected {
+  overflow: hidden;
+}
+
+/* Animation for view transitions */
+.view-transition {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
