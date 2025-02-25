@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   nepaliMonths, 
-  nepaliDays, 
   convertToBikramSambat, 
   getDaysInMonth, 
   getFirstDayOfMonth,
@@ -12,7 +11,15 @@ import {
 const englishDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const englishDaysMobile = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const BikramSambatCalendar: React.FC = () => {
+// Add props interface to receive the Nepali date string
+interface BikramSambatCalendarProps {
+  nepaliDateString?: string;
+  isNepaliLanguage?: boolean;
+}
+
+const BikramSambatCalendar: React.FC<BikramSambatCalendarProps> = ({ 
+  nepaliDateString
+}) => {
   const currentDate = convertToBikramSambat(new Date());
   
   const [selectedDate, setSelectedDate] = useState<{ year: number; month: number; day: number | null }>({
@@ -125,30 +132,6 @@ const BikramSambatCalendar: React.FC = () => {
     setViewMode('calendar');
   };
   
-  // Check if a day is a Saturday (holiday)
-  const isSaturday = (year: number, month: number, day: number): boolean => {
-    try {
-      const date = convertToGregorian(year, month, day);
-      return date.getDay() === 6; // 6 is Saturday
-    } catch {
-      // Fallback if conversion fails
-      const firstDay = getFirstDayOfMonth(year, month);
-      return (firstDay + day - 1) % 7 === 6;
-    }
-  };
-  
-  // Get the day of week for a specific date
-  const getDayOfWeek = (year: number, month: number, day: number): number => {
-    try {
-      const date = convertToGregorian(year, month, day);
-      return date.getDay();
-    } catch {
-      // Fallback if conversion fails
-      const firstDay = getFirstDayOfMonth(year, month);
-      return (firstDay + day - 1) % 7;
-    }
-  };
-  
   // Get Gregorian date for a Bikram Sambat date
   const getGregorianDay = (year: number, month: number, day: number): string => {
     try {
@@ -184,8 +167,6 @@ const BikramSambatCalendar: React.FC = () => {
       const isSelected = 
         selectedDate.day === day;
       
-      const isHoliday = isSaturday(selectedDate.year, selectedDate.month, day);
-      
       // Get the corresponding Gregorian day
       const gregorianDay = getGregorianDay(selectedDate.year, selectedDate.month, day);
       
@@ -198,8 +179,6 @@ const BikramSambatCalendar: React.FC = () => {
             border transition-colors duration-200 calendar-day overflow-hidden
             ${isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}
             ${isSelected ? 'bg-blue-500 text-white border-blue-600' : 'hover:bg-gray-100'}
-            ${isHoliday && !isSelected ? 'text-red-500 font-medium' : ''}
-            ${isHoliday && isSelected ? 'bg-red-500 text-white border-red-600' : ''}
           `}
         >
           <span className={`absolute top-0.5 right-1 text-gray-400 ${isMobile ? 'text-[6px]' : 'text-[8px]'}`}>
@@ -266,16 +245,6 @@ const BikramSambatCalendar: React.FC = () => {
     }
     
     return years;
-  };
-  
-  // Get Nepali date in full format
-  const getNepaliDateString = () => {
-    if (selectedDate.day === null) return null;
-    
-    const dayOfWeek = getDayOfWeek(selectedDate.year, selectedDate.month, selectedDate.day);
-    
-    // Always show the full date format, regardless of device
-    return `${selectedDate.day} ${nepaliDays[dayOfWeek]} ${nepaliMonths[selectedDate.month]} ${selectedDate.year}`;
   };
   
   // Get Gregorian date string for the selected date
@@ -396,11 +365,17 @@ const BikramSambatCalendar: React.FC = () => {
       {/* Selected date display - simplified */}
       {selectedDate.day && (
         <div className="mt-3 sm:mt-6 text-center">
-          <div className="text-base sm:text-lg font-semibold">
-            {getNepaliDateString()}
-          </div>
           <div className="text-xs sm:text-sm text-gray-600 mt-1">
             {getGregorianDateString()}
+          </div>
+        </div>
+      )}
+      
+      {/* Add the Nepali date display at the bottom of the calendar */}
+      {nepaliDateString && (
+        <div className="mt-3 text-center">
+          <div className="text-base sm:text-lg font-semibold text-indigo-700">
+            {nepaliDateString}
           </div>
         </div>
       )}

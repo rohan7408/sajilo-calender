@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import BikramSambatCalendar from './components/BikramSambatCalendar';
+import { convertToNepaliLanguage } from './utils/nepaliLanguage';
 
 // Define the interface for BeforeInstallPromptEvent
 interface BeforeInstallPromptEvent extends Event {
@@ -17,6 +18,12 @@ const App = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isNepaliLanguage, setIsNepaliLanguage] = useState(true);
+
+  // Toggle language function
+  const toggleLanguage = () => {
+    setIsNepaliLanguage(!isNepaliLanguage);
+  };
 
   // Update time every second
   useEffect(() => {
@@ -123,11 +130,41 @@ const App = () => {
     }
   };
 
+  const nepaliDate = "13 Tuesday Falgun 2081";
+  const nepaliLanguageDate = convertToNepaliLanguage(nepaliDate);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 relative">
+      {/* Language toggle flags in top corner */}
+      <div className="absolute top-4 right-4 cursor-pointer">
+        {isNepaliLanguage ? (
+          <div onClick={toggleLanguage} className="flex items-center transition-transform hover:scale-110">
+            <img 
+              src="https://flagcdn.com/w40/us.png" 
+              alt="Switch to English" 
+              className="w-8 h-6 object-cover rounded shadow-sm"
+              title="Switch to English"
+            />
+          </div>
+        ) : (
+          <div onClick={toggleLanguage} className="flex items-center transition-transform hover:scale-110">
+            <img 
+              src="https://flagcdn.com/w40/np.png" 
+              alt="Switch to Nepali" 
+              className="w-10 h-10 object-contain rounded shadow-sm"
+              title="Switch to Nepali"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center mb-2 text-indigo-800">Sajilo Calendar</h1>
-        <p className="text-center text-gray-600 mb-8">Your Ad-Free Calendar</p>
+        <h1 className="text-3xl font-bold text-center mb-2 text-indigo-800">
+          {isNepaliLanguage ? "साजिलो क्यालेन्डर" : "Sajilo Calendar"}
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          {isNepaliLanguage ? "तपाईंको विज्ञापन-मुक्त क्यालेन्डर" : "Your Ad-Free Calendar"}
+        </p>
         
         {isMobile && !isInstalled && (
           <div className="mb-6 flex justify-center">
@@ -143,9 +180,12 @@ const App = () => {
           </div>
         )}
         
-        <BikramSambatCalendar />
+        <BikramSambatCalendar 
+          nepaliDateString={isNepaliLanguage ? nepaliLanguageDate : nepaliDate}
+          isNepaliLanguage={isNepaliLanguage}
+        />
         
-        <div className="mt-12 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-gray-500">
           <p>
             By <a href="https://github.com/rohan7408" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 transition-colors">Rohan</a>
           </p>
