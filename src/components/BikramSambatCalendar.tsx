@@ -13,10 +13,7 @@ const englishDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const englishDaysMobile = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const BikramSambatCalendar: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState(() => {
-    const today = new Date();
-    return convertToBikramSambat(today);
-  });
+  const currentDate = convertToBikramSambat(new Date());
   
   const [selectedDate, setSelectedDate] = useState<{ year: number; month: number; day: number | null }>({
     year: currentDate.year,
