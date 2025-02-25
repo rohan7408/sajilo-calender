@@ -15,14 +15,51 @@ const App = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Check if device is mobile
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  // Format time to display as HH:MM AM/PM
+  const formatTime = (date: Date) => {
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
+  // Check if device is mobile and if app is already installed
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
+    // Check if app is running in standalone mode (installed)
+    const checkIfInstalled = () => {
+      // Define a type for navigator with the standalone property
+      interface NavigatorWithStandalone extends Navigator {
+        standalone?: boolean;
+      }
+      
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          (window.navigator as NavigatorWithStandalone).standalone || 
+                          document.referrer.includes('android-app://');
+      setIsInstalled(isStandalone);
+    };
+    
     checkMobile();
+    checkIfInstalled();
     window.addEventListener('resize', checkMobile);
     
     return () => window.removeEventListener('resize', checkMobile);
@@ -35,19 +72,20 @@ const App = () => {
       e.preventDefault();
       // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Show the install button
-      setShowInstallButton(true);
-      
-      console.log('Install prompt detected!');
+      // Show the install button only if not already installed
+      if (!isInstalled) {
+        setShowInstallButton(true);
+        console.log('Install prompt detected!');
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
 
     // For testing on devices that don't trigger the event
-    if (isMobile && !deferredPrompt) {
-      // Show a fallback install button after 3 seconds on mobile
+    if (isMobile && !deferredPrompt && !isInstalled) {
+      // Show a fallback install button after 3 seconds on mobile if not installed
       const timer = setTimeout(() => {
-        if (!showInstallButton) {
+        if (!showInstallButton && !isInstalled) {
           console.log('Showing fallback install button');
           setShowInstallButton(true);
         }
@@ -62,7 +100,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
     };
-  }, [isMobile, deferredPrompt, showInstallButton]);
+  }, [isMobile, deferredPrompt, showInstallButton, isInstalled]);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -79,7 +117,7 @@ const App = () => {
       setShowInstallButton(false);
       
       console.log(`User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
-    } else if (isMobile) {
+    } else if (isMobile && !isInstalled) {
       // Fallback for iOS devices or when the event isn't available
       alert('To install this app:\n1. Tap the share button\n2. Scroll down and tap "Add to Home Screen"');
     }
@@ -91,7 +129,7 @@ const App = () => {
         <h1 className="text-3xl font-bold text-center mb-2 text-indigo-800">Sajilo Calendar</h1>
         <p className="text-center text-gray-600 mb-8">Your Ad-Free Calendar</p>
         
-        {isMobile && (
+        {isMobile && !isInstalled && (
           <div className="mb-6 flex justify-center">
             <button 
               onClick={handleInstallClick}
@@ -111,10 +149,13 @@ const App = () => {
           <p>
             By <a href="https://github.com/rohan7408" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 transition-colors">Rohan</a>
           </p>
+          <p className="mt-2 font-medium text-indigo-600">
+            {formatTime(currentTime)}
+          </p>
         </div>
         
         {/* Sticky install button at the bottom */}
-        {showInstallButton && isMobile && (
+        {showInstallButton && isMobile && !isInstalled && (
           <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center">
             <button 
               onClick={handleInstallClick}
